@@ -60,3 +60,12 @@ GraphQL is introspective
 - heavy emphasis on published schmeas with documentation
 - allows for easy client/server-side validation of queries
 - allows for great developer tooling
+
+
+## What: Querying with Types, Arguments, and Interfaces
+
+## What: Mutating with Input Objects
+
+# How: On the Client
+
+# How: On the Server
