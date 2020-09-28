@@ -1,0 +1,91 @@
+scalar Phone
+
+enum SortDirection {
+    ASC
+    DESC
+}
+
+type PageInfo {
+    startCursor: ID
+    endCursor: ID
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+}
+
+interface Connection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+}
+
+interface Person {
+    name: String!
+    title: String
+    phone: Phone!
+    fax: Phone
+}
+
+type Address {
+    street: String!
+    city: String!
+    region: String
+    postalCode: String
+    country: String!
+}
+
+type Company {
+    id: ID!
+    name: String!
+    contact: Contact!
+    address: Address!
+}
+
+type CompanyEdge {
+    cursor: ID!
+    node: Company!
+    company: Company!
+}
+
+type CompanyConnection implements Connection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [CompanyEdge!]!
+    nodes: [Company!]!
+}
+
+input CompanyFilter {
+    "the company name matches a regex"
+    name: String
+    "the company is in the country"
+    country: String
+    "the company contact matches a regex"
+    contactName: String
+}
+
+enum CompanyOrderField {
+    NAME
+    CONTACT_NAME
+    COUNTRY
+}
+
+input CompanyOrder {
+    direction: SortDirection!
+    field: CompanyOrderField!
+}
+
+type Contact implements Person {
+    company: Company!
+    name: String!
+    title: String
+    phone: Phone!
+    fax: Phone
+}
+
+type Query {
+    companyById(id: ID!): Company
+    companySearch(
+        first: Int
+        after: ID
+        order: CompanyOrder
+        filter: CompanyFilter
+    ): CompanyConnection!
+}

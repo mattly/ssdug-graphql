@@ -2,6 +2,10 @@
 
 GraphQL is an API Query language for typed data which has graph-like relationships.
 
+- a clarification: The "Graph" in GraphQL is much more in line with the notions of tables in relational databases than it is a
+  store where any node can have a relationship with any other node. Data in GraphQL is typed, and the relationships between types are
+  defined in a schema.
+
 It allows clients to ask for the data they need, both
 
 -   making it easier to evolve APIs over time
@@ -61,11 +65,28 @@ GraphQL is introspective
 - allows for easy client/server-side validation of queries
 - allows for great developer tooling
 
-
-## What: Querying with Types, Arguments, and Interfaces
+## What: Querying with Types, Arguments, Interfaces, and Fragments
 
 ## What: Mutating with Input Objects
+## What: Extensions
 
 # How: On the Client
+## Basic HTTP mechanics
+## It's just data
+## Make queries dynamic with variables instead of interpolation
+## You probably don't need a client library, but if you do
 
 # How: On the Server
+## Resolving 101
+## AuthN/AuthZ in Resolvers
+## Resolving 201: Just-In-Time Functions
+## Resolving 202: Dataloader
+## Resolving 301: Query Selections
+
+# How: Tips from the Trenches
+## Schema Patterns
+### Think about your data
+## Client Patterns
+## Serving Patterns
+### Resolving
+### Complexity Ranking
