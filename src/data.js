@@ -1,53 +1,31 @@
 import fs from 'fs'
 import path from 'path'
-import parseCSV from 'csv-parse/lib/sync.js'
-import R from 'ramda'
+import xml from 'xml-js'
 
-const input = fs.readdirSync(`./src/data`)
-  .filter(file => path.extname(file) === '.csv')
-  .map(file => {
-    return [
-      path.basename(file, '.csv'),
-      parseCSV(fs.readFileSync(`./src/data/${file}`, 'utf8'), { columns: true })
-    ]
-  })
+const files = fs.readdirSync('./data').filter(f => path.extname(f) === '.xml')
 
 const tables = {}
 
-input.forEach(([table, data]) => {
-  console.log(table, data.length, Object.keys(data[0]))
-  tables[table] = data
-})
-
-const keys = Object.keys(tables.customers[0])
-const acc = Object.fromEntries(keys.map(k => [k, 0]))
-tables.customers.forEach(row => {
-  keys.forEach(key => {
-    if (row[key].length == 0) {
-      acc[key]++
-    }
+files.forEach(file => {
+  const table = path.basename(file, '.xml').toLowerCase()
+  const text = fs.readFileSync(`./data/${file}`, { encoding: 'utf-8' })
+  const thisData = xml.xml2js(text, { compact: true, spaces: 2 })
+  console.log(`${table}: ${thisData[table].row.length}`)
+  tables[table] = thisData[table].row.map(row => {
+    const out = {}
+    Object.keys(row._attributes).forEach(k => {
+      out[k.replace(/^\w/, s => s.toLowerCase())] = row._attributes[k]
+    })
+    return out
   })
+  const attrs = {}
+  tables[table].forEach(row => {
+    Object.keys(row).forEach(k => {
+      if (attrs[k]) { attrs[k]++ }
+      else { attrs[k] = 1 }
+    })
+  })
+  console.log(attrs)
 })
-console.log(acc)
 
-const query = (tablename, { pred, sortKey, desc, limit, pk }) => {
-  const table = tables[tablename]
-  if (!table) {
-    console.log(Object.keys(table), tablename)
-    throw new Error(`table '${tablename}' does not exist!`)
-  }
-  console.log(`querying ${tablename}: ${pred}, ${sortKey}:${desc}, ${limit}`)
-  let results = table
-  results = sortKey ? R.sortBy(row => `${row[sortKey]}--${row[pk]}`, results) : results
-  results = desc ? R.reverse(results) : results
-  results = pred ? R.filter(pred, results) : results
-  const pageResults = limit ? R.take(limit, results) : results
-  return {
-    rows: pageResults,
-    totalCount: results.length,
-  }
-}
-
-export default {
-  query,
-}
+export default tables

@@ -5,12 +5,12 @@ import fs from 'fs'
 
 import data from './src/data.js'
 
-import customers from './src/customers.js'
+import users from './src/user.js'
 
 const schema = graphql.buildSchema(fs.readFileSync('./schema.graphql', { encoding: 'utf8' }))
 
 const handlers = {
-  ...customers,
+  ...users
 }
 
 const app = express()

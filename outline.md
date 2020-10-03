@@ -67,7 +67,21 @@ GraphQL is introspective
 
 ## What: Querying with Types, Arguments, Interfaces, and Fragments
 
-## What: Mutating with Input Objects
+### the basics
+- objects (types)
+- scalars (boolean, float, int, string, id, custom)
+- enums
+- lists and optionals
+
+### flexibility
+- interfaces
+- fragments
+- unions
+- input
+- variables
+- operations
+
+## What: Mutations
 ## What: Extensions
 
 # How: On the Client
@@ -86,6 +100,7 @@ GraphQL is introspective
 # How: Tips from the Trenches
 ## Schema Patterns
 ### Think about your data
+- Use Optionals!
 ## Client Patterns
 ## Serving Patterns
 ### Resolving

@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<postlinks>
+  <row Id="26" CreationDate="2018-02-07T00:42:23.280" PostId="30" RelatedPostId="23" LinkTypeId="1" />
+  <row Id="154" CreationDate="2018-02-14T05:05:20.567" PostId="47" RelatedPostId="50" LinkTypeId="1" />
+  <row Id="155" CreationDate="2018-02-14T05:07:38.960" PostId="47" RelatedPostId="63" LinkTypeId="1" />
+  <row Id="202" CreationDate="2018-03-01T12:48:54.237" PostId="95" RelatedPostId="1" LinkTypeId="1" />
+  <row Id="244" CreationDate="2018-03-12T13:40:21.080" PostId="5" RelatedPostId="18" LinkTypeId="1" />
+  <row Id="245" CreationDate="2018-03-13T17:40:06.223" PostId="5" RelatedPostId="55" LinkTypeId="1" />
+  <row Id="246" CreationDate="2018-03-20T05:44:01.057" PostId="114" RelatedPostId="99" LinkTypeId="1" />
+  <row Id="517" CreationDate="2018-05-20T16:39:06.780" PostId="79" RelatedPostId="119" LinkTypeId="1" />
+  <row Id="518" CreationDate="2018-05-20T17:02:28.207" PostId="79" RelatedPostId="119" LinkTypeId="3" />
+  <row Id="589" CreationDate="2018-06-15T23:36:32.247" PostId="139" RelatedPostId="136" LinkTypeId="1" />
+  <row Id="595" CreationDate="2018-06-27T16:33:10.707" PostId="141" RelatedPostId="139" LinkTypeId="1" />
+  <row Id="616" CreationDate="2018-06-29T17:32:46.213" PostId="144" RelatedPostId="141" LinkTypeId="1" />
+  <row Id="631" CreationDate="2018-07-13T15:28:41.827" PostId="141" RelatedPostId="144" LinkTypeId="1" />
+  <row Id="632" CreationDate="2018-07-13T15:39:23.710" PostId="146" RelatedPostId="141" LinkTypeId="1" />
+  <row Id="645" CreationDate="2018-07-16T10:16:11.490" PostId="141" RelatedPostId="146" LinkTypeId="1" />
+  <row Id="654" CreationDate="2018-07-27T20:55:17.723" PostId="154" RelatedPostId="141" LinkTypeId="1" />
+  <row Id="655" CreationDate="2018-07-27T20:55:17.723" PostId="154" RelatedPostId="146" LinkTypeId="1" />
+  <row Id="656" CreationDate="2018-07-27T20:55:43.023" PostId="141" RelatedPostId="154" LinkTypeId="1" />
+  <row Id="715" CreationDate="2018-08-11T19:49:34.657" PostId="156" RelatedPostId="141" LinkTypeId="1" />
+  <row Id="716" CreationDate="2018-08-11T19:49:54.587" PostId="141" RelatedPostId="156" LinkTypeId="1" />
+</postlinks>

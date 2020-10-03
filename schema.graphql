@@ -1,10 +1,16 @@
-scalar Phone
+"An address for emailing with"
+scalar Email
 
-enum SortDirection {
-    ASC
-    DESC
-}
+"escaped, HTML-renderable content"
+scalar HTML
 
+"An ISO8601 DateTime"
+scalar Timestamp
+
+"a Universal Resource Locator"
+scalar URL
+
+"a pagination-spec compatible PageInfo"
 type PageInfo {
     startCursor: ID
     endCursor: ID
@@ -12,80 +18,70 @@ type PageInfo {
     hasPreviousPage: Boolean!
 }
 
+"a pagination-spec compatible Edge interface"
+interface Edge {
+    cursor: ID!
+}
+
+"a pagination-spec compatible Connection interface"
 interface Connection {
     totalCount: Int!
     pageInfo: PageInfo!
 }
 
-interface Person {
-    name: String!
-    title: String
-    phone: Phone!
-    fax: Phone
+# === generic inputs
+input NumFilter {
+    gt: Int
+    lt: Int
 }
 
-type Address {
-    street: String!
-    city: String!
-    region: String
-    postalCode: String
-    country: String!
+input StringFilter {
+    present: Boolean
+    matches: String
+    caseMatches: String
 }
 
-type Company {
+# === domain objects & related
+
+type User {
     id: ID!
-    name: String!
-    contact: Contact!
-    address: Address!
+    reputation: Int!
+    created: Timestamp!
+    displayName: String!
+    lastAccessed: Timestamp!
+    location: String
+    aboutMe: HTML
+    views: Int!
+    upVotes: Int!
+    downVotes: Int!
+    profileImageUrl: URL
+    websiteUrl: URL
 }
 
-type CompanyEdge {
+type UserEdge implements Edge {
     cursor: ID!
-    node: Company!
-    company: Company!
+    node: User!
 }
 
-type CompanyConnection implements Connection {
+type UserConnection implements Connection {
     totalCount: Int!
     pageInfo: PageInfo!
-    edges: [CompanyEdge!]!
-    nodes: [Company!]!
+    edges: [UserEdge!]!
 }
 
-input CompanyFilter {
-    "the company name matches a regex"
-    name: String
-    "the company is in the country"
-    country: String
-    "the company contact matches a regex"
-    contactName: String
-}
-
-enum CompanyOrderField {
-    NAME
-    CONTACT_NAME
-    COUNTRY
-}
-
-input CompanyOrder {
-    direction: SortDirection!
-    field: CompanyOrderField!
-}
-
-type Contact implements Person {
-    company: Company!
-    name: String!
-    title: String
-    phone: Phone!
-    fax: Phone
+input UserFilter {
+    reputation: NumFilter
+    displayName: StringFilter
+    websiteUrl: StringFilter
 }
 
 type Query {
-    companyById(id: ID!): Company
-    companySearch(
+    userById(id: ID!): User
+    userSearch(
         first: Int
         after: ID
-        order: CompanyOrder
-        filter: CompanyFilter
-    ): CompanyConnection!
+        last: Int
+        before: ID
+        filter: UserFilter
+    ): UserConnection!
 }
