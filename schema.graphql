@@ -61,6 +61,7 @@ type User {
     downVotes: Int!
     profileImageUrl: URL
     websiteUrl: URL
+    badgeCount: Int!
     badges: [Badge!]!
 }
 
@@ -82,10 +83,11 @@ input UserFilter {
 }
 
 enum UserSort {
-    created
-    displayName
-    reputation
-    lastAccessed
+    CREATED
+    DISPLAY_NAME
+    REPUTATION
+    RECENTLY_ACCESSED
+    BADGES
 }
 
 type Query {

@@ -9,9 +9,9 @@ const parseCursor = cursor => {
   return row
 }
 
-const connection = (table, { preds, page, cursorVal, desc, prepare }) => {
-  const sortDir = desc ? R.ascend : R.descend
-  const sorter = R.sortWith([sortDir(cursorVal), R.ascend(R.prop('id'))])
+const connection = (table, { preds, page, cursor, prepare }) => {
+  const sortDir = cursor.desc ? R.descend : R.ascend
+  const sorter = R.sortWith([sortDir(cursor.val), R.ascend(R.prop('id'))])
   let matchingResults = sorter(table)
   if (preds) {
     const fns = R.filter(R.identity, preds)
@@ -44,8 +44,8 @@ const connection = (table, { preds, page, cursorVal, desc, prepare }) => {
       if (thisPage.length < truncLength) { hasPreviousPage = true }
     }
   }
-  const cursor = makeCursor(page.sort, cursorVal)
-  const edges = thisPage.map(item => ({ cursor: cursor(item), node: prepare(item) }))
+  const cursorFn = makeCursor(page.sort, cursor.val)
+  const edges = thisPage.map(item => ({ cursor: cursorFn(item), node: prepare(item) }))
   const pageInfo = { hasNextPage, hasPreviousPage }
   if (thisPage.length > 0) {
     pageInfo.startCursor = edges[0].cursor
