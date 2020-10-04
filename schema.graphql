@@ -41,6 +41,12 @@ input StringFilter {
 }
 
 # === domain objects & related
+type Badge {
+    id: ID!
+    name: String!
+    date: Timestamp!
+    user: User!
+}
 
 type User {
     id: ID!
@@ -55,6 +61,7 @@ type User {
     downVotes: Int!
     profileImageUrl: URL
     websiteUrl: URL
+    badges: [Badge!]!
 }
 
 type UserEdge implements Edge {
@@ -75,10 +82,10 @@ input UserFilter {
 }
 
 enum UserSort {
-    CREATED
-    DISPLAY_NAME
-    REPUTATION
-    RECENTLY_ACCESSED
+    created
+    displayName
+    reputation
+    lastAccessed
 }
 
 type Query {

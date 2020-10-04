@@ -5,18 +5,25 @@ const userById = ({ id }, ctx) => {
   return ctx.data.users.find(user => user.id == id)
 }
 
-const cursors = {
-  'CREATED': R.prop('creationDate'),
-  'DISPLAY_NAME': R.prop('displayName'),
-  'RECENTLY_ACCESSED': R.descend(R.prop('lastAccessDate')),
-  'REPUTATION': user => parseInt(user.reputation)
+const sortAxis = (cursorVal, desc) => ({ cursorVal, desc })
+
+const sorts = {
+  'created': sortAxis(R.prop('creationDate')),
+  'displayName': sortAxis(R.prop('displayName')),
+  'lastAccessed': sortAxis(R.prop('lastAccessDate'), true),
+  'reputation': sortAxis(user => parseInt(user.reputation)),
 }
 
-const prepare = ({ creationDate, lastAccessDate, ...user }) => ({
-  ...user,
-  created: creationDate,
-  lastAccessed: lastAccessDate,
-})
+const prepareUser = (ctx) => ({ creationDate, lastAccessDate, ...row }) => {
+  let user = {
+    ...row,
+    created: creationDate,
+    lastAccessed: lastAccessDate,
+    badges: ctx.data.badges.filter(({ userId }) => userId == row.id)
+  }
+
+  return user
+}
 
 const userSearch = (args, ctx) => {
   const page = query.pageArgs(args, { sort: 'CREATED' })
@@ -30,8 +37,8 @@ const userSearch = (args, ctx) => {
   return query.connection(ctx.data.users, {
     page,
     preds,
-    cursorVal: cursors[page.sort],
-    prepare,
+    ...sorts[page.sort],
+    prepare: prepareUser(ctx),
   })
 }
 

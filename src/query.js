@@ -1,12 +1,18 @@
 import R from 'ramda'
 
-const makeCursor = ( sort, cursorVal ) => row => `${sort}:${cursorVal(row)},id:${row.id}`
+const makeCursor = ( sort, cursorVal ) => row => `${sort}:${cursorVal(row)}:${row.id}`
 
-const connection = (table, { preds, page, cursorVal, prepare }) => {
-  let matchingResults = R.sortWith([
-    R.ascend(cursorVal),
-    R.ascend(R.prop('id'))
-  ], table)
+const parseCursor = cursor => {
+  const [col, val, id] = cursor.split(':')
+  const row = { id }
+  row[col] = val
+  return row
+}
+
+const connection = (table, { preds, page, cursorVal, desc, prepare }) => {
+  const sortDir = desc ? R.ascend : R.descend
+  const sorter = R.sortWith([sortDir(cursorVal), R.ascend(R.prop('id'))])
+  let matchingResults = sorter(table)
   if (preds) {
     const fns = R.filter(R.identity, preds)
     matchingResults = R.filter(R.allPass(fns), matchingResults)
@@ -16,12 +22,15 @@ const connection = (table, { preds, page, cursorVal, prepare }) => {
   let thisPage = matchingResults
   if (page) {
     const matchLen = matchingResults.length
+    const cursorSort = vals => R.equals(vals, sorter(vals))
     if (page.after) {
-      thisPage = R.dropWhile(item => makeCursor(item) <= page.after, thisPage)
+      let afterCursor = parseCursor(page.after)
+      thisPage = R.dropWhile(row => cursorSort([row, afterCursor]), thisPage)
       if (thisPage.length < matchLen) { hasPreviousPage = true }
     }
     if (page.before) {
-      thisPage = R.dropLastWhile(item => makeCursor(item) >= page.before, thisPage)
+      let beforeCursor = parseCursor(page.before)
+      thisPage = R.dropLastWhile(row => cursorSort([beforeCursor, row]), thisPage)
       if (thisPage.length < matchLen) { hasNextPage = true }
     }
     const truncLength = thisPage.length
