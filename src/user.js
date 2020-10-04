@@ -19,8 +19,11 @@ const prepare = ({ creationDate, lastAccessDate, ...user }) => ({
 const userSearch = (args, ctx) => {
   const page = query.pageArgs(args, { sort: 'ID' })
   const filter = args.filter || {}
-  let preds = []
-  preds = R.concat(preds, query.NumFilter(filter.reputation, 'reputation'))
+  const preds = R.flatten([
+    query.NumFilter(filter.reputation, R.prop('reputation')),
+    query.StringFilter(filter.displayName, R.prop('displayName')),
+    query.StringFilter(filter.websiteUrl, R.prop('websiteUrl'))
+  ])
 
   return query.connection(ctx.data.users, {
     page,

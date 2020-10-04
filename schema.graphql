@@ -38,7 +38,6 @@ input NumFilter {
 input StringFilter {
     present: Boolean
     matches: String
-    caseMatches: String
 }
 
 # === domain objects & related

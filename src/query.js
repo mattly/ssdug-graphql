@@ -3,7 +3,8 @@ import R from 'ramda'
 const connection = (table, { preds, page, makeCursor, prepare }) => {
   let matchingResults = R.sortBy(makeCursor, table)
   if (preds) {
-    matchingResults = R.filter(R.allPass(preds), matchingResults)
+    const fns = R.filter(R.identity, preds)
+    matchingResults = R.filter(R.allPass(fns), matchingResults)
   }
   let hasNextPage = false
   let hasPreviousPage = false
@@ -60,13 +61,25 @@ const pageArgs = (args, fallbacks) => {
 const padNum = (len, num) =>
   R.takeLast(len, R.concat(R.times(R.always('0'), len), `${num}`.split(''))).join('')
 
-const NumFilter = (filter, prop) => {
-  const preds = []
-  const getProp = R.pipe(R.prop(prop), n => parseInt(n))
-  if (!filter) { return preds }
-  if (filter.lt) { preds.push(R.pipe(getProp, R.lt(R.__, filter.lt))) }
-  if (filter.gt) { preds.push(R.pipe(getProp, R.gt(R.__, filter.gt))) }
-  return preds
+const NumFilter = (filter={}, getter) => {
+  const getProp = R.pipe(getter, n => parseInt(n))
+  return [
+    filter.lt && ( row => R.lt(getProp(row), filter.lt) ),
+    filter.gt && ( row => R.gt(getProp(row), filter.gt) )
+  ]
+}
+
+const isPresent = R.anyPass([R.isNil, R.isEmpty])
+
+const StringFilter = (filter={}, getter) => {
+  return [
+    R.is(Boolean, filter.present) && (
+      row => filter.present ? isPresent(getter(row)) : !isPresent(getter(row))
+    ),
+    filter.matches && (
+      expr => row => (getter(row) || "").match(expr)
+    )(new RegExp(filter.matches)) // warning - don't do this to user input in production code
+  ]
 }
 
 export default {
@@ -74,4 +87,5 @@ export default {
   pageArgs,
   padNum,
   NumFilter,
+  StringFilter,
 }
