@@ -74,6 +74,13 @@ input UserFilter {
     websiteUrl: StringFilter
 }
 
+enum UserSort {
+    CREATED
+    DISPLAY_NAME
+    REPUTATION
+    RECENTLY_ACCESSED
+}
+
 type Query {
     userById(id: ID!): User
     userSearch(
@@ -82,5 +89,6 @@ type Query {
         last: Int
         before: ID
         filter: UserFilter
+        sort: UserSort
     ): UserConnection!
 }

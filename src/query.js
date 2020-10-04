@@ -1,7 +1,12 @@
 import R from 'ramda'
 
-const connection = (table, { preds, page, makeCursor, prepare }) => {
-  let matchingResults = R.sortBy(makeCursor, table)
+const makeCursor = ( sort, cursorVal ) => row => `${sort}:${cursorVal(row)},id:${row.id}`
+
+const connection = (table, { preds, page, cursorVal, prepare }) => {
+  let matchingResults = R.sortWith([
+    R.ascend(cursorVal),
+    R.ascend(R.prop('id'))
+  ], table)
   if (preds) {
     const fns = R.filter(R.identity, preds)
     matchingResults = R.filter(R.allPass(fns), matchingResults)
@@ -30,9 +35,8 @@ const connection = (table, { preds, page, makeCursor, prepare }) => {
       if (thisPage.length < truncLength) { hasPreviousPage = true }
     }
   }
-  const edges = thisPage
-     .map(prepare)
-     .map(item => ({ cursor: makeCursor(item), node: item }))
+  const cursor = makeCursor(page.sort, cursorVal)
+  const edges = thisPage.map(item => ({ cursor: cursor(item), node: prepare(item) }))
   const pageInfo = { hasNextPage, hasPreviousPage }
   if (thisPage.length > 0) {
     pageInfo.startCursor = edges[0].cursor
@@ -45,21 +49,15 @@ const connection = (table, { preds, page, makeCursor, prepare }) => {
   }
 }
 
-const pageArgs = (args, fallbacks) => {
+const pageArgs = (args, defaults) => {
   const { first, after, last, before } = args
   if (first && last) {
     throw new Error("cannot specify `first` and `last` page arguments")
   }
   const out = { first, after, last, before }
-  if (true) {
-    out.sort = fallbacks.sort
-  }
+  out.sort = args.sort || defaults.sort
   return out
 }
-
-// yeah I'm basic
-const padNum = (len, num) =>
-  R.takeLast(len, R.concat(R.times(R.always('0'), len), `${num}`.split(''))).join('')
 
 const NumFilter = (filter={}, getter) => {
   const getProp = R.pipe(getter, n => parseInt(n))
@@ -69,12 +67,12 @@ const NumFilter = (filter={}, getter) => {
   ]
 }
 
-const isPresent = R.anyPass([R.isNil, R.isEmpty])
+const isPresent = R.complement(R.anyPass([R.isNil, R.isEmpty]))
 
 const StringFilter = (filter={}, getter) => {
   return [
     R.is(Boolean, filter.present) && (
-      row => filter.present ? isPresent(getter(row)) : !isPresent(getter(row))
+      row => isPresent(getter(row)) == filter.present
     ),
     filter.matches && (
       expr => row => (getter(row) || "").match(expr)
@@ -85,7 +83,6 @@ const StringFilter = (filter={}, getter) => {
 export default {
   connection,
   pageArgs,
-  padNum,
   NumFilter,
   StringFilter,
 }

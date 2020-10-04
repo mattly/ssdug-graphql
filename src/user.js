@@ -6,9 +6,11 @@ const userById = ({ id }, ctx) => {
 }
 
 const cursors = {
-  'ID': user => query.padNum(8, user.id)
+  'CREATED': R.prop('creationDate'),
+  'DISPLAY_NAME': R.prop('displayName'),
+  'RECENTLY_ACCESSED': R.descend(R.prop('lastAccessDate')),
+  'REPUTATION': user => parseInt(user.reputation)
 }
-const userCursor = page => user => `user:${cursors[page.sort](user)}`
 
 const prepare = ({ creationDate, lastAccessDate, ...user }) => ({
   ...user,
@@ -17,7 +19,7 @@ const prepare = ({ creationDate, lastAccessDate, ...user }) => ({
 })
 
 const userSearch = (args, ctx) => {
-  const page = query.pageArgs(args, { sort: 'ID' })
+  const page = query.pageArgs(args, { sort: 'CREATED' })
   const filter = args.filter || {}
   const preds = R.flatten([
     query.NumFilter(filter.reputation, R.prop('reputation')),
@@ -28,7 +30,7 @@ const userSearch = (args, ctx) => {
   return query.connection(ctx.data.users, {
     page,
     preds,
-    makeCursor: userCursor(page),
+    cursorVal: cursors[page.sort],
     prepare,
   })
 }
