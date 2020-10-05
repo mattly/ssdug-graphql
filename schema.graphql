@@ -48,6 +48,66 @@ type Badge {
     user: User!
 }
 
+interface Commentable {
+    id: ID!
+    created: Timestamp!
+    body: HTML!
+    score: Int!
+    author: User!
+}
+
+type Question implements Commentable {
+    id: ID!
+    created: Timestamp!
+    title: String!
+    body: HTML!
+    score: Int!
+    views: Int!
+    author: User!
+    acceptedAnswer: Answer
+    unacceptedAnswers: [Answer!]!
+}
+
+type QuestionEdge implements Edge {
+    cursor: ID!
+    node: Question!
+}
+
+type QuestionConnection implements Connection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [QuestionEdge!]!
+    totalScore: Int!
+}
+
+input QuestionFilter {
+    score: NumFilter
+    title: StringFilter
+    views: NumFilter
+    author: UserFilter
+    authorIs: ID
+    answered: Boolean
+}
+
+enum QuestionSort {
+    "sort by the most recent questions"
+    RECENT
+    "sort by the highest score"
+    SCORE
+    "sort by the most views"
+    VIEWS
+}
+
+type Answer implements Commentable {
+    id: ID!
+    created: Timestamp!
+    body: HTML!
+    score: Int!
+    author: User!
+    parent: Question!
+}
+union Post = Question | Answer
+
 type User {
     id: ID!
     reputation: Int!
@@ -63,6 +123,12 @@ type User {
     websiteUrl: URL
     badgeCount: Int!
     badges: [Badge!]!
+    questions(
+        first: Int
+        last: Int
+        filter: QuestionFilter
+        sort: QuestionSort
+    ): QuestionConnection!
 }
 
 type UserEdge implements Edge {
@@ -80,17 +146,36 @@ input UserFilter {
     reputation: NumFilter
     displayName: StringFilter
     websiteUrl: StringFilter
+    hasBadge: String
 }
 
 enum UserSort {
+    "sort by the user's creation date"
     CREATED
+    "sort alphabetically by the user's display name"
     DISPLAY_NAME
+    "sort by the highest reputation"
     REPUTATION
+    "sort by the most recently accessed user"
     RECENTLY_ACCESSED
+    "sort by the most badges"
     BADGES
+    "sort by the highest question count"
+    QUESTION_COUNT
+    "sort by the highest sum of question scores"
+    QUESTION_SCORES
 }
 
 type Query {
+    questionSearch(
+        first: Int
+        after: ID
+        last: Int
+        before: ID
+        filter: QuestionFilter
+        sort: QuestionSort
+    ): QuestionConnection!
+
     userById(id: ID!): User
     userSearch(
         first: Int

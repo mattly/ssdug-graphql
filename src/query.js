@@ -9,7 +9,12 @@ const parseCursor = cursor => {
   return row
 }
 
-const connection = (table, { preds, page, cursor, prepare }) => {
+const makeEdge = (cursorFn, prepare) => async (row) => {
+  const node = await prepare(row)
+  return { node, cursor: cursorFn(row)}
+}
+
+const connection = async(table, { preds, page, cursor, prepare, withAll }) => {
   const sortDir = cursor.desc ? R.descend : R.ascend
   const sorter = R.sortWith([sortDir(cursor.val), R.ascend(R.prop('id'))])
   let matchingResults = sorter(table)
@@ -45,16 +50,18 @@ const connection = (table, { preds, page, cursor, prepare }) => {
     }
   }
   const cursorFn = makeCursor(page.sort, cursor.val)
-  const edges = thisPage.map(item => ({ cursor: cursorFn(item), node: prepare(item) }))
+  const edges = await Promise.all(thisPage.map(makeEdge(cursorFn, prepare)))
   const pageInfo = { hasNextPage, hasPreviousPage }
   if (thisPage.length > 0) {
     pageInfo.startCursor = edges[0].cursor
     pageInfo.endCursor = edges[edges.length-1].cursor
   }
+  const overAll = withAll ? withAll(matchingResults) : {}
   return {
     edges,
     pageInfo,
-    totalCount: matchingResults.length
+    totalCount: matchingResults.length,
+    ...overAll
   }
 }
 
@@ -68,6 +75,20 @@ const pageArgs = (args, defaults) => {
   return out
 }
 
+const FKeyFilter = (filterVal, getter) => {
+  return [
+    filterVal && (row => getter(row) == filterVal)
+  ]
+}
+
+const isPresent = R.complement(R.anyPass([R.isNil, R.isEmpty]))
+
+const BooleanFilter = (filterVal, getter) => {
+  return [
+    !R.isNil(filterVal) && (row => isPresent(getter(row)) == filterVal )
+  ]
+}
+
 const NumFilter = (filter={}, getter) => {
   const getProp = R.pipe(getter, n => parseInt(n))
   return [
@@ -75,8 +96,6 @@ const NumFilter = (filter={}, getter) => {
     filter.gt && ( row => R.gt(getProp(row), filter.gt) )
   ]
 }
-
-const isPresent = R.complement(R.anyPass([R.isNil, R.isEmpty]))
 
 const StringFilter = (filter={}, getter) => {
   return [
@@ -89,9 +108,18 @@ const StringFilter = (filter={}, getter) => {
   ]
 }
 
+const StringIn = (filterVal, getter) => {
+  return [
+    filterVal && (row => R.includes(filterVal, getter(row)))
+  ]
+}
+
 export default {
   connection,
   pageArgs,
+  FKeyFilter,
+  BooleanFilter,
   NumFilter,
   StringFilter,
+  StringIn,
 }
