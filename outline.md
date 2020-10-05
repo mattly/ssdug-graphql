@@ -24,14 +24,14 @@ GraphQL is declarative and crosses references
                         author { login avatarUrl }
                         repository { name url } } }
           	starredRepositories(first: 5, orderBy: { field:STARRED_AT direction:DESC }) {
-              	totalCount pageInfo { hasNextPage endCursor }
+              totalCount pageInfo { hasNextPage endCursor }
             	nodes { name url description stargazerCount
-                        owner { login avatarUrl }
-                        labels(first: 10) { nodes { name color }}
-                        watchers(first: 0) { totalCount } }
+                      owner { login avatarUrl }
+                      labels(first: 10) { nodes { name color }}
+                      watchers(first: 0) { totalCount } }
             }
           	following(first: 5) {
-              	totalCount pageInfo { hasNextPage endCursor }
+              totalCount pageInfo { hasNextPage endCursor }
             	nodes { ...on User {
                     login avatarUrl url
                     repositories(first: 3, orderBy: {field: STARGAZERS, direction: DESC}) {
@@ -82,6 +82,25 @@ GraphQL is introspective
 - operations
 
 ## What: Mutations
+
+## What: Validation
+- type system allows for the server to provide a lot of error-handling for free:
+  - fields must exist
+  - selecting an object must include at least one field on it
+  - cannot select fields on an enum/scalar
+  - argument validation
+- fragments cannot refer to themselves or create a cycle
+- servers enforce type system, optionality
+
+## What: Pagination Pattern & Connection Model (optional)
+- Why: https://graphql.org/learn/pagination/
+- What: https://relay.dev/graphql/connections.htm
+
+## What: Global Object ID (optional)
+- "Node" Interface with `id: ID!` field
+- `node(id: ID!)` root field returning Node interface
+- having IDs be globally unique helps clients build caches
+
 ## What: Customizations
 - directives
 - extensions
@@ -93,8 +112,10 @@ GraphQL is introspective
 ## You probably don't need a client library, but if you do
 
 # How: On the Server
-## Resolving 101
-## AuthN/AuthZ in Resolvers
+## Resolving 101: Immediate Eager Resolution
+## AuthN/AuthZ
+find in context, define authz logic in business layer
+
 ## Resolving 201: Just-In-Time Functions
 ## Resolving 202: Dataloader
 ## Resolving 301: Query Selections
