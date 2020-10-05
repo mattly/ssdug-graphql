@@ -13,7 +13,11 @@ appendCursor(questionCursors, 'SCORE', row => parseInt(row.score), true)
 appendCursor(questionCursors, 'VIEWS', row => parseInt(row.views), true)
 
 const prepareQuestion = ctx => async ({ creationDate, ...post }) => {
-  const q = { ...post, created: creationDate }
+  const q = {
+    ...post,
+    created: creationDate,
+    __typename: 'Question',
+  }
   // - method one: eagerly, directly
   const user = userById({ id: post.ownerUserId }, ctx)
   // - method two: eagerly, dataloader
