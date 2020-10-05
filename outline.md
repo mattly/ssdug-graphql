@@ -82,7 +82,9 @@ GraphQL is introspective
 - operations
 
 ## What: Mutations
-## What: Extensions
+## What: Customizations
+- directives
+- extensions
 
 # How: On the Client
 ## Basic HTTP mechanics
@@ -96,12 +98,9 @@ GraphQL is introspective
 ## Resolving 201: Just-In-Time Functions
 ## Resolving 202: Dataloader
 ## Resolving 301: Query Selections
+## On Guard: Complexity Ranking
 
-# How: Tips from the Trenches
+# Tips from the Trenches
 ## Schema Patterns
 ### Think about your data
 - Use Optionals!
-## Client Patterns
-## Serving Patterns
-### Resolving
-### Complexity Ranking

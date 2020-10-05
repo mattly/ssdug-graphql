@@ -64,8 +64,8 @@ type Question implements Commentable {
     score: Int!
     views: Int!
     author: User!
-    acceptedAnswer: Answer
-    unacceptedAnswers: [Answer!]!
+    # acceptedAnswer: Answer
+    # unacceptedAnswers: [Answer!]!
 }
 
 type QuestionEdge implements Edge {
