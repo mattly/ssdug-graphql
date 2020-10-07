@@ -1,5 +1,6 @@
 import DataLoader from 'dataloader'
 import R from 'ramda'
+import gqlQueryPaths from 'graphql-query-path'
 import query from './query.js'
 
 const appendCursor = (cursors, name, getter, desc) => {
@@ -12,23 +13,112 @@ appendCursor(questionCursors, 'RECENT', R.prop('creationDate'), true)
 appendCursor(questionCursors, 'SCORE', row => parseInt(row.score), true)
 appendCursor(questionCursors, 'VIEWS', row => parseInt(row.views), true)
 
-const prepareQuestion = ctx => async ({ creationDate, ...post }) => {
+const prepareAnswer = (ctx) => ({ creationDate, ...post }) => {
+  const a = {
+    ...post,
+    created: creationDate,
+    __typename: 'Answer',
+    author: () => ctx.loaders.userById.load(post.ownerUserId),
+    parent: () => ctx.data.posts.find(p => p.id == post.parentId),
+    isAcceptedAnswer: () => {
+      const parent = ctx.data.posts.find(p => p.id == post.parentId)
+      return parent && parent.acceptedAnswerId == post.id
+    }
+  }
+  return a
+}
+
+const postConnectionStats = (selections) => (rows) => {
+    const ret = {}
+    if (selections.selects('totalScore')) {
+      ret.totalScore = R.sum(rows.map(r => parseInt(r.score)))
+    }
+    return ret
+  }
+
+const answerSearch = (args, ctx, info) => {
+  ctx.lookup('answerSearch')
+  const page = query.pageArgs(args, { sort: 'SCORE' })
+  const filter = args.filter || {}
+  const preds = R.flatten([
+    row => row.postTypeId == '2',
+    query.FKeyFilter(filter.parentIs, R.prop('parentId')),
+    query.FKeyFilter(filter.authorIs, R.prop('ownerUserId')),
+  ])
+
+  const selections = new Selections(getPath(info), gqlQueryPaths.getPaths(info))
+
+  return query.connection(ctx.data.posts, {
+    page, preds,
+    cursor: questionCursors[page.sort](ctx),
+    prepare: prepareAnswer(ctx),
+    withAll: postConnectionStats(selections),
+  })
+}
+
+const prepareQuestion = ( ctx, selections ) => ({ creationDate, ...post }) => {
   const q = {
     ...post,
     created: creationDate,
     __typename: 'Question',
   }
+  let user
   // - method one: eagerly, directly
-  const user = userById({ id: post.ownerUserId }, ctx)
+  user = userById({ id: post.ownerUserId }, ctx)
   // - method two: eagerly, dataloader
-  // const user = await ctx.loaders.userById.load(post.ownerUserId)
+  // user = ctx.loaders.userById.load(post.ownerUserId)
   // - method three: lazily, dataloader
-  // const user = () => ctx.loaders.userById.load(post.ownerUserId)
+  // user = () => ctx.loaders.userById.load(post.ownerUserId)
+  // - method four: checking the query selections
+  // user = selections.selects('author/') && ctx.loaders.userById.load(post.ownerUserId)
   q.author = user
+
+  if (post.acceptedAnswerId && selections.selects('acceptedAnswer/')) {
+    q.acceptedAnswer = prepareAnswer(ctx)(ctx.data.posts.find(({id}) => id == post.acceptedAnswerId))
+  }
+
+  if (selections.selects('unacceptedAnswers/')) {
+    q.unacceptedAnswers = (args, innerCtx) => {
+      args.filter = { parentIs: post.id }
+      return answerSearch(args, innerCtx)
+    }
+  }
+
   return q
 }
 
-const questionSearch = (args, ctx) => {
+const getPath = info => {
+  const frags = []
+  let path = info.path
+  frags.unshift(path.key)
+  while (path.prev) {
+    path = path.prev
+    if (typeof path.key == 'string') {
+      frags.unshift(path.key)
+    }
+  }
+  return `/${frags.join('/')}`
+}
+
+class Selections {
+  constructor(point, paths) {
+    this.point = point
+    this.paths = paths
+  }
+  selects(path) {
+    return R.includes(`${this.point}/${path}`, this.paths)
+  }
+  into(...paths) {
+    return new Selections(`${this.point}/${paths.join('/')}`, this.paths)
+  }
+  subpaths() {
+    return this.paths
+      .filter(p => R.startsWith(this.point, p))
+      .map(p => p.substr(this.point.length))
+  }
+}
+
+const questionSearch = (args, ctx, info) => {
   ctx.lookup('questionSearch')
   const page = query.pageArgs(args, { sort: 'RECENT'})
   const filter = args.filter || {}
@@ -43,14 +133,14 @@ const questionSearch = (args, ctx) => {
       (q) => f(ctx.data.users.find(user => user.id == q.ownerUserId)))
   ])
 
+  const selections = new Selections(getPath(info), gqlQueryPaths.getPaths(info))
+
   return query.connection(ctx.data.posts, {
     page,
     preds,
     cursor: questionCursors[page.sort](ctx),
-    prepare: prepareQuestion(ctx),
-    withAll: (rows) => ({
-      totalScore: R.sum(rows.map(r => parseInt(r.score)))
-    }),
+    prepare: prepareQuestion(ctx, selections.into('edges', 'node')),
+    withAll: postConnectionStats(selections)
   })
 }
 
@@ -68,8 +158,12 @@ const prepareUser = (ctx) => ({ creationDate, lastAccessDate, ...row }) => {
     lastAccessed: lastAccessDate,
     badges,
     badgeCount: badges.length,
-    questions: ({ filter = {}, ...args }) =>
-      questionSearch({ ...args, filter: {...filter, authorIs: user.id } }, ctx),
+    questions: ({ filter = {}, ...args }, innerCtx, info) =>
+      questionSearch({ ...args, filter: {...filter, authorIs: user.id } }, innerCtx, info),
+    answers: (args, innerCtx, info) => {
+      args.filter = { authorIs: user.id }
+      return answerSearch(args, innerCtx, info)
+    }
   }
   return user
 }

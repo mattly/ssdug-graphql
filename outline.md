@@ -109,23 +109,51 @@ GraphQL is introspective
 
 # How: On the Client
 ## Basic HTTP mechanics
+my blog post: https://lyonheart.us/articles/consuming-graphql-simply/
+
 ## It's just data
+- figure out how to map an api's schema to your language's type/data system
+- "success" is often granular, it's not all or nothing
+
 ## Make queries dynamic with variables instead of interpolation
+- seriously, this will save you so many headaches. don't try to get clever,
+  have a plain-text query you can copy/paste into graphiQL & play with variables
+
 ## You probably don't need a client library, but if you do
+- relay, the OG heavyweight: https://relay.dev
+- apollo for javascript: https://www.apollographql.com
 
 # How: On the Server
+## Use a library!
+don't write it yourself if you don't have to, the spec is *huge*. There are plenty of great implementations already: https://graphql.org/code/
+
+I will personally vouch for lacinia for clojure and gql-gen for Go
+
 ## Resolving 101: Immediate Eager Resolution
+Just send everything in the tree back, let your library handle all the fiddly details of paring it down
+
 ## AuthN/AuthZ
 find in context, define authz logic in business layer
 
-## Resolving 201: Just-In-Time Functions
-## Resolving 202: Dataloader
+## Resolving 201: type-level resolvers
+- kinda like a function on a class method, this will vary with your language & library
+- also needed for fields that take argumetns
+
+## Resolving 202: Avoiding n+1 with Dataloader
+batching & caching pattern to separate the mechanics of loading resources from where they actually are. A loader is constructed on a per-context/request basis, caches are often in-memory and for the lifecycle of the context/request
+
+- javascript reference implementation: https://github.com/graphql/dataloader
+- implementatins in other languages, the readme's list is incomplete
+- ultimately a very simple pattern
+- good writeup: https://medium.com/@__xuorig__/the-graphql-dataloader-pattern-visualized-3064a00f319f
+
 ## Resolving 301: Query Selections
 ## On Guard: Complexity Ranking
 
 # Tips from the Trenches
 ## Schema Patterns
 - Think about your data
+- Document, document, document
 - Use Optionals!
   any field that involves something which could go wrong should be nullable
 - decide on naming scheme, patterns

@@ -48,15 +48,7 @@ type Badge {
     user: User!
 }
 
-interface Commentable {
-    id: ID!
-    created: Timestamp!
-    body: HTML!
-    score: Int!
-    author: User!
-}
-
-type Question implements Commentable {
+type Question {
     id: ID!
     created: Timestamp!
     title: String!
@@ -64,8 +56,14 @@ type Question implements Commentable {
     score: Int!
     views: Int!
     author: User!
-    # acceptedAnswer: Answer
-    # unacceptedAnswers: [Answer!]!
+
+    "the answer marked as accepted"
+    acceptedAnswer: Answer
+
+    "answers not marked as accepted, sorted by the highest score"
+    unacceptedAnswers(
+        first: Int
+    ): AnswerConnection!
 }
 
 type QuestionEdge implements Edge {
@@ -89,23 +87,37 @@ input QuestionFilter {
     answered: Boolean
 }
 
-enum QuestionSort {
+enum PostSort {
     "sort by the most recent questions"
     RECENT
     "sort by the highest score"
     SCORE
-    "sort by the most views"
+    "sort by the most views (works for questions only)"
     VIEWS
 }
 
-type Answer implements Commentable {
+type Answer {
     id: ID!
     created: Timestamp!
     body: HTML!
     score: Int!
     author: User!
     parent: Question!
+    isAcceptedAnswer: Boolean!
 }
+
+type AnswerEdge {
+    cursor: ID!
+    node: Answer!
+}
+
+type AnswerConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [AnswerEdge!]!
+    totalScore: Int!
+}
+
 union Post = Question | Answer
 
 type User {
@@ -127,8 +139,12 @@ type User {
         first: Int
         last: Int
         filter: QuestionFilter
-        sort: QuestionSort
+        sort: PostSort
     ): QuestionConnection!
+    answers(
+        first: Int
+        sort: PostSort
+    ): AnswerConnection!
 }
 
 type UserEdge implements Edge {
@@ -173,7 +189,7 @@ type Query {
         last: Int
         before: ID
         filter: QuestionFilter
-        sort: QuestionSort
+        sort: PostSort
     ): QuestionConnection!
 
     userById(id: ID!): User

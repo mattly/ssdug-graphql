@@ -480,6 +480,11 @@ graceful-fs@^4.1.2:
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.4.tgz#2256bde14d3632958c465ebc96dc467ca07a29fb"
   integrity sha512-WjKPNJF79dtJAVniUlGGWHYGz2jWxT6VhN/4m1NdkbZ2nOsEF+cI1Edgql5zCRhs/VsQYRvrXctxktVXZUkixw==
 
+graphql-query-path@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/graphql-query-path/-/graphql-query-path-1.1.2.tgz#6f3497b52e742a5a54de2c63611f7f63f159e022"
+  integrity sha512-9qJ6PoQ/FU0j5g/W7itoNHg5IP3G8DdHpqZSBh/oDoebw3WmwQOIZJFJ0/aQWsT2VQavWjyK6VGlD7icsFm8eA==
+
 graphql@^15.3.0:
   version "15.3.0"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.3.0.tgz#3ad2b0caab0d110e3be4a5a9b2aa281e362b5278"
