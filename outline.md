@@ -92,6 +92,8 @@ GraphQL is introspective
 - fragments cannot refer to themselves or create a cycle
 - servers enforce type system, optionality
 
+## What: Introspection & Documentation
+
 ## What: Pagination Pattern & Connection Model (optional)
 - Why: https://graphql.org/learn/pagination/
 - What: https://relay.dev/graphql/connections.htm
@@ -123,5 +125,9 @@ find in context, define authz logic in business layer
 
 # Tips from the Trenches
 ## Schema Patterns
-### Think about your data
+- Think about your data
 - Use Optionals!
+  any field that involves something which could go wrong should be nullable
+- decide on naming scheme, patterns
+  that is, {something}Connection vs {something}s, {something}Count, and so on
+- avoid versioning
