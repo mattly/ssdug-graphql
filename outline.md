@@ -148,6 +148,8 @@ batching & caching pattern to separate the mechanics of loading resources from w
 - good writeup: https://medium.com/@__xuorig__/the-graphql-dataloader-pattern-visualized-3064a00f319f
 
 ## Resolving 301: Query Selections
+Because the client has told us what they want, we can use that information at query-time to decide how to best-optimize the work needed to produce that result
+
 ## On Guard: Complexity Ranking
 
 # Tips from the Trenches
