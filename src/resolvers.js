@@ -222,6 +222,18 @@ const userSearch = (args, ctx) => {
   })
 }
 
+const addBadge = ({ userId, badgeName }, ctx) => {
+  const user = ctx.data.users.find(({ id }) => userId == id)
+  if (! user) { throw new Error(`can't find user ${id}`)}
+  ctx.data.badges.push({
+    id: ctx.data.badges.length, // definitely don't do this in prod
+    userId,
+    name: badgeName,
+    date: new Date().toISOString(),
+  })
+  return ctx.loaders.userById.load(userId)
+}
+
 const loaders = (ctx) => ({
   userById: new DataLoader(keys => batchUsersById(keys, ctx)),
 })
@@ -229,5 +241,6 @@ const loaders = (ctx) => ({
 export default {
   questionSearch,
   userById, userSearch,
+  addBadge,
   loaders
 }

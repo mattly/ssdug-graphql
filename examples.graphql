@@ -1,0 +1,114 @@
+
+query GetUser {
+	userById(id: "112") {
+    displayName
+    reputation
+    badges { name }
+    questions(first: 5) {
+      totalCount
+      totalScore
+      edges { node {
+        id created title score
+      }}
+    }
+    answers(first: 5) {
+			totalCount
+    }
+  }
+}
+
+query SearchUsers {
+  userSearch(
+		first: 5
+    after: "BADGES:14:53"
+    sort: QUESTION_COUNT
+    filter: {
+      # reputation: { gt: 100 }
+      # displayName: { matches: "b" }
+      # websiteUrl: { present: true }
+      # hasBadge: "Teacher"
+    }
+) {
+    totalCount
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        displayName
+        reputation
+        upVotes
+        downVotes
+        views
+        lastAccessed
+        websiteUrl
+        badgeCount
+        # badges { id name date }
+				questions {
+					totalCount
+					totalScore
+					edges { node { title score }}
+				}
+        answers {
+          totalCount
+          totalScore
+          edges { node {
+            score
+            isAcceptedAnswer
+            parent { title score }
+          }}
+        }
+      }
+    }
+  }
+}
+
+query SearchQuestions {
+  questionSearch(
+    first: 5
+    sort: SCORE
+    filter: {
+      # title: { matches: "lang" }
+      # answered: true
+      # authorIs: "19"
+      # author: {
+      #   hasBadge: "Teacher"
+      # }
+    }
+  ) {
+    totalCount
+    edges {
+      node {
+        id
+        title
+        score
+        acceptedAnswer {
+          score
+          author { displayName }
+        }
+        unacceptedAnswers {
+          totalCount
+          edges { node {
+            score
+            author { displayName }}}
+        }
+        author {
+          displayName
+          # badges { name }
+          questions{ totalCount totalScore }
+        }
+      }
+    }
+  }
+}
+
+mutation AddBadge {
+  addBadge(userId: "112" badgeName: "Teacher") {
+    badges { name }
+  }
+}

@@ -17,17 +17,6 @@ files.forEach(file => {
     })
     return out
   })
-  // if (['tags', 'users', 'badges'].indexOf(table) == -1) {
-  //   console.log(`${table}: ${thisData[table].row.length}`)
-  //   const attrs = {}
-  //   tables[table].forEach(row => {
-  //     Object.keys(row).forEach(k => {
-  //       if (attrs[k]) { attrs[k]++ }
-  //       else { attrs[k] = 1 }
-  //     })
-  //   })
-  //   console.log(attrs)
-  // }
 })
 
 export default tables

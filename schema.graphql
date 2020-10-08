@@ -233,3 +233,15 @@ type Query {
         sort: UserSort
     ): UserConnection!
 }
+
+input AddBadge {
+    userId: ID!
+    badgeName: String!
+}
+
+type Mutation {
+    addBadge(
+        userId: ID!
+        badgeName: String!
+    ): User!
+}
