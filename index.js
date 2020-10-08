@@ -27,23 +27,33 @@ app.use((request, response, next) => {
   next()
 })
 
+const errorFmt = ({ message, locations, stack, path}) => ({
+  message, locations, path,
+  stack: stack ? stack.split('\n') : []
+})
+
 // app.use('/graphql', expressGraphql.graphqlHTTP({
 //   schema,
 //   rootValue: resolvers,
 //   graphiql: true,
-
+//   custonFormatErrorFn: errorFmt,
 // }))
 
-app.use('/graphql', expressGraphql.graphqlHTTP(async (request, response, { variables }) => ({
+app.use('/graphql', expressGraphql.graphqlHTTP(async (request, response, { operationName, variables }) => ({
   schema,
   rootValue: resolvers,
   graphiql: true,
+  customFormatErrorFn: errorFmt,
   validationRules: [
     queryComplexity.default({
-      estimators: [queryComplexity.simpleEstimator({ defaultComplexity: 1 })],
+      estimators: [
+        queryComplexity.directiveEstimator({ name: 'complexity' }),
+        queryComplexity.simpleEstimator({ defaultComplexity: 0 })
+      ],
       maximumComplexity: 100,
       variables,
-      onComplete: (score) => console.log(`complexity: ${score}`)
+      operationName,
+      onComplete: (score) => console.log(`${operationName} complexity: ${score}`)
     })
   ]
 })))

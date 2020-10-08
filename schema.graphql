@@ -1,3 +1,9 @@
+directive @complexity(
+    value: Int!
+) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+
+
 "An address for emailing with"
 scalar Email
 
@@ -31,13 +37,13 @@ interface Connection {
 
 # === generic inputs
 input NumFilter {
-    gt: Int
-    lt: Int
+    gt: Int @complexity(value: 2)
+    lt: Int @complexity(value: 2)
 }
 
 input StringFilter {
-    present: Boolean
-    matches: String
+    present: Boolean @complexity(value: 2)
+    matches: String  @complexity(value: 10)
 }
 
 # === domain objects & related
@@ -55,15 +61,20 @@ type Question {
     body: HTML!
     score: Int!
     views: Int!
+
+    "the person who authored the question"
     author: User!
+    @complexity(value: 5)
 
     "the answer marked as accepted"
     acceptedAnswer: Answer
+    @complexity(value: 10)
 
     "answers not marked as accepted, sorted by the highest score"
     unacceptedAnswers(
         first: Int
     ): AnswerConnection!
+    @complexity(value: 20)
 }
 
 type QuestionEdge implements Edge {
@@ -75,7 +86,10 @@ type QuestionConnection implements Connection {
     totalCount: Int!
     pageInfo: PageInfo!
     edges: [QuestionEdge!]!
+
+    "the sum total scores for all questions in this connection"
     totalScore: Int!
+    @complexity(value: 5)
 }
 
 input QuestionFilter {
@@ -83,8 +97,8 @@ input QuestionFilter {
     title: StringFilter
     views: NumFilter
     author: UserFilter
-    authorIs: ID
-    answered: Boolean
+    authorIs: ID       @complexity(value: 5)
+    answered: Boolean  @complexity(value: 2)
 }
 
 enum PostSort {
@@ -102,8 +116,13 @@ type Answer {
     body: HTML!
     score: Int!
     author: User!
+    @complexity(value: 3)
     parent: Question!
+    @complexity(value: 3)
+
+    "is this the accepted answer for its question?"
     isAcceptedAnswer: Boolean!
+    @complexity(value: 5)
 }
 
 type AnswerEdge {
@@ -112,10 +131,16 @@ type AnswerEdge {
 }
 
 type AnswerConnection {
+    "the total count for all answers in this connection"
     totalCount: Int!
+    @complexity(value: 2)
+
     pageInfo: PageInfo!
     edges: [AnswerEdge!]!
+
+    "the sum total of scores for all answers in this connection"
     totalScore: Int!
+    @complexity(value: 5)
 }
 
 union Post = Question | Answer
@@ -135,16 +160,22 @@ type User {
     websiteUrl: URL
     badgeCount: Int!
     badges: [Badge!]!
+
+    "all questions the user has submitted"
     questions(
         first: Int
         last: Int
         filter: QuestionFilter
         sort: PostSort
     ): QuestionConnection!
+    @complexity(value: 10)
+
+    "all answers the user has submitted"
     answers(
         first: Int
         sort: PostSort
     ): AnswerConnection!
+    @complexity(value: 10)
 }
 
 type UserEdge implements Edge {
@@ -162,7 +193,7 @@ input UserFilter {
     reputation: NumFilter
     displayName: StringFilter
     websiteUrl: StringFilter
-    hasBadge: String
+    hasBadge: String @complexity(value: 10)
 }
 
 enum UserSort {

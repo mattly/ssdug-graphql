@@ -151,6 +151,8 @@ batching & caching pattern to separate the mechanics of loading resources from w
 Because the client has told us what they want, we can use that information at query-time to decide how to best-optimize the work needed to produce that result
 
 ## On Guard: Complexity Ranking
+- validation already prevents recursive fragments, or unlimited-depth queries,
+- still, complexity-ranking is a common tool for preventing a client from asking you to do too much work in one go. think of it like rate-limiting, but around work performed, not rate of asking
 
 # Tips from the Trenches
 ## Schema Patterns

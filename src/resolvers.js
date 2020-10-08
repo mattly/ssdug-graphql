@@ -102,19 +102,15 @@ const getPath = info => {
 
 class Selections {
   constructor(point, paths) {
-    this.point = point
     this.paths = paths
+      .filter(p => R.startsWith(point, p))
+      .map(p => p.substr(point.length + 1))
   }
   selects(path) {
-    return R.includes(`${this.point}/${path}`, this.paths)
+    return R.includes(path, this.paths)
   }
   into(...paths) {
-    return new Selections(`${this.point}/${paths.join('/')}`, this.paths)
-  }
-  subpaths() {
-    return this.paths
-      .filter(p => R.startsWith(this.point, p))
-      .map(p => p.substr(this.point.length))
+    return new Selections(paths.join('/'), this.paths)
   }
 }
 
