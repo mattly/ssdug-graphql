@@ -78,9 +78,9 @@ const prepareQuestion = ( ctx, selections ) => ({ creationDate, ...post }) => {
   }
 
   if (selections.selects('unacceptedAnswers/')) {
-    q.unacceptedAnswers = (args, innerCtx) => {
+    q.unacceptedAnswers = (args, innerCtx, info) => {
       args.filter = { parentIs: post.id }
-      return answerSearch(args, innerCtx)
+      return answerSearch(args, innerCtx, info)
     }
   }
 

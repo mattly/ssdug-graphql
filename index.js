@@ -1,7 +1,9 @@
 import express from 'express'
 import expressGraphql from 'express-graphql'
 import graphql from 'graphql'
+import queryComplexity from 'graphql-query-complexity'
 import fs from 'fs'
+
 
 import data from './src/data.js'
 
@@ -25,11 +27,26 @@ app.use((request, response, next) => {
   next()
 })
 
-app.use('/graphql', expressGraphql.graphqlHTTP({
+// app.use('/graphql', expressGraphql.graphqlHTTP({
+//   schema,
+//   rootValue: resolvers,
+//   graphiql: true,
+
+// }))
+
+app.use('/graphql', expressGraphql.graphqlHTTP(async (request, response, { variables }) => ({
   schema,
   rootValue: resolvers,
   graphiql: true,
-}))
+  validationRules: [
+    queryComplexity.default({
+      estimators: [queryComplexity.simpleEstimator({ defaultComplexity: 1 })],
+      maximumComplexity: 100,
+      variables,
+      onComplete: (score) => console.log(`complexity: ${score}`)
+    })
+  ]
+})))
 
 const port = 3000
 app.listen(port)

@@ -24,6 +24,7 @@
     "express": "^4.17.1",
     "express-graphql": "^0.11.0",
     "graphql": "^15.3.0",
+    "graphql-query-complexity": "^0.7.0",
     "graphql-query-path": "^1.1.2",
     "ramda": "^0.27.1",
     "xml-js": "^1.6.11"
